@@ -1,0 +1,65 @@
+parameters:
+  - name: azureSubscription
+    type: string
+  - name: appType
+    type: string
+    default: webappLinux
+  - name: WebAppName
+    type: string
+  - name: deployToSlotOrASE
+    type: boolean
+    default: false
+  - name: ResourceGroupName
+    type: string
+    default: "" # required if deployToSlotOrASE == true
+  - name: SlotName
+    type: string
+    default: production # required if deployToSlotOrASE == true
+  - name: packageForLinux
+    type: string
+    default: $(System.DefaultWorkingDirectory)/**/*.zip # required when appKind == webappLinux
+  - name: RuntimeStack
+    type: string
+    default: Node
+  - name: StartupCommand
+    type: string
+  - name: ScriptType
+  # not supported at the moment
+  #  - name: InlineScript
+  #  - name: ScriptPath
+  - name: JSONFiles
+    type: string
+    default: ""
+  - name: AppSettings
+    type: string
+    default: ""
+  - name: ConfigurationSettings
+    type: string
+    default: ""
+
+
+steps:
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+      ConnectionType: AzureRM
+      azureSubscription: ${{ parameters.azureSubscription }}
+      appType:           ${{ parameters.appType           }}
+      WebAppName:        ${{ parameters.WebAppName        }}
+      deployToSlotOrASE: ${{ parameters.deployToSlotOrASE }}
+      ResourceGroupName: ${{ parameters.ResourceGroupName }}
+      SlotName:          ${{ parameters.SlotName          }}
+      packageForLinux:   ${{ parameters.packageForLinux   }}
+      RuntimeStack:      ${{ parameters.RuntimeStack      }}
+      StartupCommand:    ${{ parameters.StartupCommand    }}
+
+  - task: AzureAppServiceSettings@1
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription     }}
+      appName:           ${{ parameters.WebAppName            }}
+      resourceGroupName: ${{ parameters.ResourceGroupName     }}
+      slotName:          ${{ parameters.SlotName              }}
+      appSettings:       ${{ parameters.AppSettings           }}
+      generalSettings:   ${{ parameters.ConfigurationSettings }}
+      # required ??
+      #connectionStrings: # string. Connection Strings.
+
